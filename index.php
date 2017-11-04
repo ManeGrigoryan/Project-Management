@@ -3,7 +3,6 @@ session_start();
 require 'dbconn.php';
 //require 'alltables.php';
 $page = isset($_REQUEST['page']) ? $_REQUEST['page'] : '';
-
 // Login
 if ($page == 'login' || $page == 'login.php') {
 //    header('Location: http://www.projectmanagement.com/login.php');
