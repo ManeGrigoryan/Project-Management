@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 require 'dbconn.php';
 //require 'alltables.php';
