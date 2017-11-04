@@ -1,6 +1,8 @@
 <?php
 session_start();
 require 'dbconn.php';
+
+
 //require 'alltables.php';
 $page = isset($_REQUEST['page']) ? $_REQUEST['page'] : '';
 // Login
