@@ -61,11 +61,10 @@ if (isset($_SESSION['email'])) {
                     $project_manager_email = $row['email'];
                     $first_name = $row['firstname'];
                     $last_name = $row['lastname'];
-                    ?>
 
-                    <option value="<?php echo $project_manager_email; ?>>" <?php echo $first_name . ' ' . $last_name; ?> </option>;
 
-                    <?php
+                    echo "<option value='$project_manager_email' > $first_name $last_name </option>";
+
                 }
                 ?>
             </select>
