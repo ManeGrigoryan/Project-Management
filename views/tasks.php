@@ -3,19 +3,17 @@
 // Add columns (create_date, update_date) to tasks and projects tables
 
 if (isset($_SESSION['email'])) {
+
     switch ($user['position']) {
 
         case 'admin':
-            $query = "SELECT proj_name, task_name, task_description, task_assignee 
-                      FROM Tasks 
-                      ORDER BY proj_name ASC";
             echo '<form action="" method="post">
             <input type="text" name="search" placeholder="Search"></br>
             <label>
             <select name="project_name" size="1">
             <option value="">Select a Project</option>';
 
-            $proj_name = $mysqli->query("SELECT  `proj_name`  FROM `Projects`");
+            $proj_name = $mysqli->query("SELECT  `proj_name`  FROM `Projects` ");
             while ($row = $proj_name->fetch_assoc()) {
 
                 $project_name = $row['proj_name'];
@@ -27,9 +25,27 @@ if (isset($_SESSION['email'])) {
             </label>';
 
             echo '<label>
+            <select name="project_manager" size="1">
+            <option value="">Select Manager</option>';
+            $managers = $mysqli->query("SELECT DISTINCT firstname, lastname, email 
+                                                FROM users WHERE position='manager'");
+            while ($row = $managers->fetch_assoc()) {
+
+                $manager_email = $row['email'];
+                $manager_firstname = $row['firstname'];
+                $manager_lastname = $row['lastname'];
+
+                echo "<option value='$manager_email' > $manager_firstname $manager_lastname </option>";
+
+            }
+            echo '</select></br>
+            </label>';
+
+            echo '<label>
             <select name="developer" size="1">
-            <option value="">Select a Developer</option>';
-            $developers = $mysqli->query("SELECT  `email`, `firstname`, `lastname` FROM `Users` WHERE `position` = 'developer'");
+            <option value="">Select Developer</option>';
+            $developers = $mysqli->query("SELECT DISTINCT firstname, lastname, email 
+                                                FROM users WHERE position='developer'");
             while ($row = $developers->fetch_assoc()) {
 
                 $assignee_email = $row['email'];
@@ -43,14 +59,113 @@ if (isset($_SESSION['email'])) {
             </label>
             <input type="submit" name="searchbutton" value="Search">
             </form>';
+
+          if(isset($_POST['searchbutton'], $_POST['search'], $_POST['project_name'],$_POST['developer'],$_POST['project_manager'])){
+              global $query;
+              $pattern=$_POST['search'];
+              $project_name=$_POST['project_name'];
+              $project_manager=$_POST['project_manager'];
+              $task_assignee=$_POST['developer'];
+
+              if(!empty($pattern) && !empty($project_name)&& !empty($project_manager)&& !empty($task_assignee)){
+                $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON tasks.proj_name='".$project_name."' AND projects.proj_manager='".$project_manager."' 
+                       AND tasks.task_assignee='".$task_assignee."' AND tasks.task_name LIKE '%".$pattern."%'");
+              }
+              elseif (!empty($pattern)&& !empty($project_name) && !empty(!$project_manager) && empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON tasks.proj_name='".$project_name."' AND projects.proj_manager='".$project_manager."' 
+                       AND tasks.task_name LIKE '%".$pattern."%'");
+              }
+              elseif (!empty($pattern)&& !empty($project_name) && empty($project_manager) && !empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON tasks.proj_name='".$project_name."'  
+                       AND tasks.task_assignee='".$task_assignee."' AND tasks.task_name LIKE '%".$pattern."%'");
+              }
+              elseif (!empty($pattern)&& !empty($project_name) &&empty($project_manager) && empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON tasks.proj_name='".$project_name."' AND tasks.task_name LIKE '%".$pattern."%'");
+              }
+              elseif (!empty($pattern)&& empty($project_name)&& !empty($project_manager)&& !empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON projects.proj_manager='".$project_manager."' 
+                       AND tasks.task_assignee='".$task_assignee."' AND tasks.task_name LIKE '%".$pattern."%'");
+              }
+              elseif (!empty($pattern)&&empty($project_name) && !empty($project_manager)&&empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON  projects.proj_manager='".$project_manager."' AND tasks.task_name LIKE '%".$pattern."%'");
+              }
+              elseif (!empty($pattern)&& empty($project_name) && empty($project_manager) && !empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON tasks.task_assignee='".$task_assignee."' AND tasks.task_name LIKE '%".$pattern."%'");
+              }
+              elseif (!empty($pattern) && empty($project_name) && empty($project_manager) && empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON tasks.task_name LIKE '%".$pattern."%'");
+              }
+              elseif (empty($pattern) && !empty($project_name) && !empty($project_manager)&&!empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON tasks.proj_name='".$project_name."' AND projects.proj_manager='".$project_manager."' 
+                       AND tasks.task_assignee='".$task_assignee."'");
+              }
+              elseif (empty($pattern)&& !empty($project_name)&& !empty($project_manager && empty($task_assignee))){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON tasks.proj_name='".$project_name."' AND projects.proj_manager='".$project_manager."' ");
+              }
+              elseif (empty($pattern)&& !empty($project_name)&& empty($project_manager)&& !empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON tasks.proj_name='".$project_name."'  AND tasks.task_assignee='".$task_assignee."' ");
+              }
+              elseif (empty($pattern)&&!empty($project_name)&& empty($project_manager) && empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON tasks.proj_name='".$project_name."'");
+              }
+              elseif (empty($pattern)&&empty($project_name) &&!empty($project_manager)&&!empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON projects.proj_manager='".$project_manager."' AND tasks.task_assignee='".$task_assignee."' ");
+              }
+              elseif (empty($pattern)&&empty($project_name) &&!empty($project_manager)&&empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON  projects.proj_manager='".$project_manager."' AND tasks.proj_name=projects.proj_name");
+              }
+              elseif (empty($pattern)&&empty($project_name) && empty($project_manager) && !empty($task_assignee)){
+                  $query=$mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` 
+                       FROM projects JOIN tasks 
+                       ON  tasks.task_assignee='".$task_assignee."'");
+              }
+              elseif (empty($pattern)&&empty($project_name)&&empty($project_manager)&&empty($task_assignee)){
+                  $query=$mysqli->query("SELECT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` FROM tasks");
+              }
+          }
+          else{
+              $query=$mysqli->query("SELECT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` FROM tasks");
+          }
+
+
+
             break;
 
 
         case 'manager':
-            $query = "SELECT tasks.proj_name, task_name, task_description, task_assignee
+
+            $query = $mysqli->query("SELECT tasks.proj_name, task_name, task_description, task_assignee
                       FROM Tasks JOIN Projects 
                       ON tasks.proj_name = projects.proj_name AND projects.proj_manager ='" . $user['email'] . "'
-                      ORDER BY tasks.proj_name ASC";
+                      ORDER BY tasks.proj_name ASC");
             echo '<form action="" method="post">
             <input type="text" name="search" placeholder="Search"></br>
             <label>
@@ -89,13 +204,69 @@ if (isset($_SESSION['email'])) {
             </label>
             <input type="submit" name="searchbutton" value="Search">
             </form>';
+            if (isset($_POST['searchbutton'], $_POST['search'], $_POST['project_name'], $_POST['developer'])) {
+                global $query;
+                $pattern = $_POST['search'];
+                $project_name = $_POST['project_name'];
+                $task_assignee = $_POST['developer'];
+                if (!empty($pattern) && !empty($project_name) && !empty($task_assignee)) {
+                    $query = $mysqli->query("SELECT DISTINCT tasks.proj_name, tasks.task_name ,tasks.task_description, tasks.task_assignee
+                    FROM projects JOIN tasks
+                    ON projects.proj_manager='" . $user['email'] . "' AND projects.proj_name=tasks.proj_name
+                    AND tasks.proj_name ='" . $project_name . "' AND tasks.task_assignee='" . $task_assignee . "' 
+                    AND tasks.task_name LIKE '%" . $pattern . "%' OR tasks.task_description LIKE  '%" . $pattern . "%' ");
+                } elseif (!empty($pattern) && !empty($project_name) && empty($task_assignee)) {
+                    $query = $mysqli->query("SELECT DISTINCT tasks.proj_name, tasks.task_name ,tasks.task_description, tasks.task_assignee
+                    FROM projects JOIN tasks
+                    ON projects.proj_manager='" . $user['email'] . "' AND projects.proj_name=tasks.proj_name
+                    AND tasks.proj_name ='" . $project_name . "' 
+                    AND tasks.task_name LIKE '%" . $pattern . "%' OR tasks.task_description LIKE  '%" . $pattern . "%' ");
+                } elseif (!empty($pattern) && empty($project_name) && empty($task_assignee)) {
+                    $query = $mysqli->query("SELECT DISTINCT tasks.proj_name, tasks.task_name ,tasks.task_description, tasks.task_assignee
+                    FROM projects JOIN tasks
+                    ON projects.proj_manager='" . $user['email'] . "' AND projects.proj_name=tasks.proj_name
+                    AND tasks.task_name LIKE '%" . $pattern . "%' OR tasks.task_description LIKE  '%" . $pattern . "%' ");
+                } elseif (!empty($pattern) && empty($project_name) && !empty($task_assignee)) {
+                    $query = $mysqli->query("SELECT DISTINCT tasks.proj_name, tasks.task_name ,tasks.task_description, tasks.task_assignee
+                    FROM projects JOIN tasks
+                    ON projects.proj_manager='" . $user['email'] . "' AND projects.proj_name=tasks.proj_name
+                    AND tasks.task_assignee='" . $task_assignee . "' 
+                    AND tasks.task_name LIKE '%" . $pattern . "%' OR tasks.task_description LIKE  '%" . $pattern . "%' ");
+                } elseif (empty($pattern) && !empty($project_name) && !empty($task_assignee)) {
+                    $query = $mysqli->query("SELECT DISTINCT tasks.proj_name, tasks.task_name ,tasks.task_description, tasks.task_assignee
+                    FROM projects JOIN tasks
+                    ON projects.proj_manager='" . $user['email'] . "' AND projects.proj_name=tasks.proj_name
+                    AND tasks.proj_name ='" . $project_name . "' AND tasks.task_assignee='" . $task_assignee . "' ");
+                } elseif (empty($pattern) && !empty($project_name) && empty($task_assignee)) {
+                    $query = $mysqli->query("SELECT DISTINCT tasks.proj_name, tasks.task_name ,tasks.task_description, tasks.task_assignee
+                    FROM projects JOIN tasks
+                    ON projects.proj_manager='" . $user['email'] . "' AND projects.proj_name=tasks.proj_name
+                    AND tasks.proj_name ='" . $project_name . "' ");
+                } elseif (empty($pattern) && empty($project_name) && !empty($task_assignee)) {
+                    $query = $mysqli->query("SELECT DISTINCT tasks.proj_name, tasks.task_name ,tasks.task_description, tasks.task_assignee
+                    FROM projects JOIN tasks
+                    ON projects.proj_manager='" . $user['email'] . "' AND projects.proj_name=tasks.proj_name
+                    AND tasks.task_assignee='" . $task_assignee . "' ");
+                } elseif (empty($pattern) && empty($project_name) && empty($task_assignee)) {
+                    $query = $mysqli->query("SELECT DISTINCT tasks.proj_name, task_name, task_description, task_assignee
+                      FROM Tasks JOIN Projects 
+                      ON tasks.proj_name = projects.proj_name AND projects.proj_manager ='" . $user['email'] . "'
+                      ORDER BY tasks.proj_name ASC");
+
+                } else {
+                    $query = $mysqli->query("SELECT DISTINCT tasks.proj_name, task_name, task_description, task_assignee
+                      FROM Tasks JOIN Projects 
+                      ON tasks.proj_name = projects.proj_name AND projects.proj_manager ='" . $user['email'] . "'
+                      ORDER BY tasks.proj_name ASC");
+                }
+
+
+            }
             break;
 
 
         case 'developer':
-            $query = "SELECT `tasks`.`proj_name`,`task_name`,`task_description`, `task_assignee` 
-                      FROM `tasks` JOIN `users`
-                      ON `task_assignee` = '" . $user['email'] . "' AND `email` = '" . $user['email'] . "' ";
+
             echo '<form action="" method="post">
             <input type="text" name="search" placeholder="Search"></br>
             <label>
@@ -114,10 +285,47 @@ if (isset($_SESSION['email'])) {
             </label>
             <input type="submit" name="searchbutton" value="Search">
             </form>';
+
+            if (isset($_POST['searchbutton'], $_POST['search'], $_POST['project_name'])) {
+                global $query;
+                $pattern = $_POST['search'];
+                $project_name = $_POST['project_name'];
+                if (!empty($project_name) && !empty($pattern)) {
+
+                    $query = $mysqli->query("SELECT DISTINCT `tasks`.`proj_name`,`task_name`,`task_description`, `task_assignee` 
+                      FROM `tasks` JOIN `users`
+                      ON `task_assignee` = '" . $user['email'] . "' AND `email` = '" . $user['email'] . "'
+                      AND proj_name= '" . $project_name . "' AND task_name LIKE '%" . $pattern . "%' ");
+                } elseif (!empty($project_name) && empty($pattern)) {
+                    $query = $mysqli->query("SELECT DISTINCT `tasks`.`proj_name`,`task_name`,`task_description`, `task_assignee` 
+                      FROM `tasks` JOIN `users`
+                      ON `task_assignee` = '" . $user['email'] . "' AND `email` = '" . $user['email'] . "'
+                      AND proj_name= '" . $project_name . "' ");
+                } elseif (empty($project_name) && !empty($pattern)) {
+                    $query = $mysqli->query("SELECT DISTINCT `tasks`.`proj_name`,`task_name`,`task_description`, `task_assignee` 
+                        FROM `tasks` JOIN `users`
+                        ON `task_assignee` = '" . $user['email'] . "' AND `email` = '" . $user['email'] . "'
+                        AND task_name LIKE  '%" . $pattern . "%' ");
+                } elseif (empty($project_name) && empty($pattern)) {
+                    $query = $mysqli->query("SELECT DISTINCT `tasks`.`proj_name`,`task_name`,`task_description`, `task_assignee` 
+                      FROM `tasks` JOIN `users`
+                      ON `task_assignee` = '" . $user['email'] . "' AND `email` = '" . $user['email'] . "' ");
+                } else {
+                    $query = $mysqli->query("SELECT DISTINCT `tasks`.`proj_name`,`task_name`,`task_description`, `task_assignee` 
+                      FROM `tasks` JOIN `users`
+                      ON `task_assignee` = '" . $user['email'] . "' AND `email` = '" . $user['email'] . "' ");
+                }
+
+            } else {
+                $query = $mysqli->query("SELECT DISTINCT `tasks`.`proj_name`,`task_name`,`task_description`, `task_assignee` 
+                      FROM `tasks` JOIN `users`
+                      ON `task_assignee` = '" . $user['email'] . "' AND `email` = '" . $user['email'] . "' ");
+            }
+
+
             break;
 
     }
-    $result = mysqli_query($db, $query);
 
 
     echo "<table id = tasks> <caption>Tasks</caption>
@@ -127,12 +335,17 @@ if (isset($_SESSION['email'])) {
     <th>Task Description</th>
     <th>Task Assignee Email</th>
 </tr><tr>";
-    if (!$result) {
+    if (!$query) {
+        var_dump($query);
+        var_dump($project_manager);
+        var_dump($pattern);
+        var_dump($project_name);
+        var_dump($task_assignee);
         printf("Error: %s\n", mysqli_error($db));
         exit();
     }
 
-    while ($row = mysqli_fetch_array($result)) {
+    while ($row = mysqli_fetch_array($query)) {
         echo "<td>" . $row['proj_name'] . "</td>
            <td>" . $row['task_name'] . "</td>
            <td>" . $row['task_description'] . "</td>
