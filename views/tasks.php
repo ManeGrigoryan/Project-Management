@@ -1,6 +1,5 @@
 <?php
 // Add filtering functionality by (task name, task assignee, project)
-// Add columns (create_date, update_date) to tasks and projects tables
 
 if (isset($_SESSION['email'])) {
 

@@ -3,22 +3,65 @@
 
 if (isset($_SESSION['email'])) {
 
-    $query = "SElECT * FROM projects";
+
     switch ($user['position']) {
         case 'admin':
-            $and = "";
+            echo '<form action="" method="post">
+            <label>
+            <select name="project_name" size="1">
+            <option value="">Select a Project</option>';
+
+            $proj_name = $mysqli->query("SELECT  `proj_name`  FROM `Projects` ");
+            while ($row = $proj_name->fetch_assoc()) {
+
+                $project_name = $row['proj_name'];
+
+                echo '<option value="' . $project_name . '"> ' . $project_name . '</option>';
+            }
+
+            echo '</select> </br>
+            </label>';
+
+            echo '<label>
+            <select name="project_manager" size="1">
+            <option value="">Select Manager</option>';
+            $managers = $mysqli->query("SELECT DISTINCT firstname, lastname, email 
+                                                FROM users WHERE position='manager'");
+            while ($row = $managers->fetch_assoc()) {
+
+                $manager_email = $row['email'];
+                $manager_firstname = $row['firstname'];
+                $manager_lastname = $row['lastname'];
+
+                echo "<option value='$manager_email' > $manager_firstname $manager_lastname </option>";
+
+            }
+            echo '</select></br>
+                   </label>
+                   <input type="submit" name="searchbutton" value="Search"></br>
+                   </form>';
+
+            if (isset($_POST['searchbutton'], $_POST['project_manager'], $_POST['project_name'])){
+                $project_manager=$_POST['project_manager'];
+                $project_name=$_POST['project_name'];
+                global $query;
+                $query="SELECT `proj_name`, `description`, `proj_manager` FROM projects WHERE proj_manager LIKE '%".$project_manager."%' 
+                        AND proj_name LIKE '%".$project_name."%' "
+                        ;
+            }
+            else {$query = "SElECT * FROM projects";}
             break;
         case 'manager':
-            $and = " WHERE proj_manager = '" . $user['email'] . "'";
+            $query = " SElECT * FROM projects WHERE proj_manager = '" . $user['email'] . "'";
             break;
         case 'developer':
-            $and = " JOIN tasks ON `projects`.`proj_name` = `tasks`.`proj_name` AND `task_assignee` ='" . $user['email'] . "'";
+            $query = "SElECT * FROM projects  JOIN tasks ON `projects`.`proj_name` = `tasks`.`proj_name` AND `task_assignee` ='" . $user['email'] . "'";
             break;
         default:
             break;
 
     }
-    $query .= $and;
+
 
     $result = mysqli_query($db, $query);
 
@@ -53,7 +96,7 @@ if (isset($_SESSION['email'])) {
             <input type='text' name='description' placeholder='Project Description' required><br>
             <label for="manager"> Project Manager </label>
             <select id="manager" name="project_manager" size='1' required>
-                <option value=""> SELECT PROJECT MANAGER</option>
+                <option value=""> Select Project Manager</option>
                 <?php
                 $managers = $mysqli->query("SELECT  `email`, `firstname`, `lastname`  FROM `Users` WHERE `position`='manager' ");
                 while ($row = $managers->fetch_assoc()) {
