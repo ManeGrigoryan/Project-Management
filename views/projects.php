@@ -89,16 +89,14 @@ if (isset($_SESSION['email'])) {
     echo "</table>";
 
     if ($user['position'] == 'admin') {
-        ?>
-        <form action='#' method='POST'>
-            <input type='submit' value='Add New Project' name='newproject'><br>
-            <input type='text' name='proj_name' placeholder='Project Name' required><br>
-            <input type='text' name='description' placeholder='Project Description' required><br>
+     echo '<form action="" method="POST">
+            <input type="submit" value="Add New Project" name="newproject"><br>
+            <input type="text" name="proj_name" placeholder="Project Name" required><br>
+            <input type="text" name="description" placeholder="Project Description" required><br>
             <label for="manager"> Project Manager </label>
-            <select id="manager" name="project_manager" size='1' required>
-                <option value=""> Select Project Manager</option>
-                <?php
-                $managers = $mysqli->query("SELECT  `email`, `firstname`, `lastname`  FROM `Users` WHERE `position`='manager' ");
+            <select id="manager" name="project_manager" size="1" required>
+            <option value=""> Select Project Manager</option>';
+     $managers = $mysqli->query("SELECT  `email`, `firstname`, `lastname`  FROM `Users` WHERE `position`='manager' ");
                 while ($row = $managers->fetch_assoc()) {
 
                     $project_manager_email = $row['email'];
@@ -109,18 +107,22 @@ if (isset($_SESSION['email'])) {
                     echo "<option value='$project_manager_email' > $first_name $last_name </option>";
 
                 }
-                ?>
-            </select>
-        </form>
 
-        <?php
+          echo ' </select>
+            <label> Start date:</label><input type="date" name="start_day" value="Start Day" required></br></label>
+            <label> Deadline:</label><input type="date" name="deadline" value="Deadline" required></br></label>
+        </form>' ;
 
-        if (isset($_POST['proj_name'], $_POST['description'], $_POST['project_manager'], $_POST['newproject'])) {
+
+
+        if (isset($_POST['proj_name'], $_POST['description'], $_POST['project_manager'], $_POST['newproject'], $_POST['start_day'], $_POST['deadline'])) {
             $project_manager = ($_POST['project_manager']);
             $proj_name = ($_POST['proj_name']);
             $description = ($_POST['description']);
-            $sql = " INSERT INTO `Projects` (`proj_name`, `description`, `proj_manager`)
-VALUES ('$proj_name', '$description', '$project_manager') ";
+            $start_day=$_POST['start_day'];
+            $deadline=$_POST['deadline'];
+            $sql = " INSERT INTO `Projects` (`proj_name`, `description`, `proj_manager`, `start_day`, `deadline`)
+                    VALUES ('$proj_name', '$description', '$project_manager', '$start_day', '$deadline') ";
 
             if (!empty($proj_name) && !empty($description) && !empty($project_manager)) {
                 $result = $mysqli->query("SELECT * FROM projects WHERE proj_name = '$proj_name'") or die();
@@ -134,7 +136,7 @@ VALUES ('$proj_name', '$description', '$project_manager') ";
 
                 } else {
                     echo "NEW PROJECT HAS BEEN INSERTED";
-                    header('refresh:0', 'Location: http://www.projectmanagement.com/projects.php');
+                    header('refresh:2', 'Location: http://www.projectmanagement.com/projects.php');
                     die();
 
 
