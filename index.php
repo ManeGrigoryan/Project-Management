@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'dbconn.php';
+
 //require 'alltables.php';
 $page = isset($_REQUEST['page']) ? $_REQUEST['page'] : '';
 // Login
@@ -29,9 +30,10 @@ if (empty($_SESSION['email'])) {
     $email = $_SESSION['email'];
     $result = $mysqli->query("SELECT * FROM Users WHERE email = '$email'");
     $user = $result->fetch_assoc();
+
 }
 
-
+require 'views/permissions.php';
 require('header.php');
 require('content.php');
 require('footer.php');

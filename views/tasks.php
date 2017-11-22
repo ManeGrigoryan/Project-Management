@@ -1,89 +1,8 @@
 <?php
-// Add filtering functionality by (task name, task assignee, project)
-
 if (isset($_SESSION['email'])) {
-
-    switch ($user['position']) {
-
-        case 'admin':
-            echo '<form action="" method="post">
-            <input type="text" name="search" placeholder="Search"></br>
-            <label>
-            <select name="project_name" size="1">
-            <option value="">Select a Project</option>';
-
-            $proj_name = $mysqli->query("SELECT  `proj_name`  FROM `Projects` ");
-            while ($row = $proj_name->fetch_assoc()) {
-
-                $project_name = $row['proj_name'];
-
-                echo '<option value="' . $project_name . '"> ' . $project_name . '</option>';
-            }
-
-            echo '</select> </br>
-            </label>';
-
-            echo '<label>
-            <select name="project_manager" size="1">
-            <option value="">Select Manager</option>';
-            $managers = $mysqli->query("SELECT DISTINCT firstname, lastname, email 
-                                                FROM users WHERE position='manager'");
-            while ($row = $managers->fetch_assoc()) {
-
-                $manager_email = $row['email'];
-                $manager_firstname = $row['firstname'];
-                $manager_lastname = $row['lastname'];
-
-                echo "<option value='$manager_email' > $manager_firstname $manager_lastname </option>";
-
-            }
-            echo '</select></br>
-            </label>';
-
-            echo '<label>
-            <select name="developer" size="1">
-            <option value="">Select Developer</option>';
-            $developers = $mysqli->query("SELECT DISTINCT firstname, lastname, email 
-                                                FROM users WHERE position='developer'");
-            while ($row = $developers->fetch_assoc()) {
-
-                $assignee_email = $row['email'];
-                $assignee_firstname = $row['firstname'];
-                $assignee_lastname = $row['lastname'];
-
-                echo "<option value='$assignee_email' > $assignee_firstname $assignee_lastname </option>";
-
-            }
-            echo '</select></br>
-            </label>
-            <input type="submit" name="searchbutton" value="Search">
-            </form>';
-            if (isset($_POST['searchbutton'])) {
-                if (isset($_POST['searchbutton'], $_POST['search'], $_POST['project_name'], $_POST['developer'], $_POST['project_manager'])) {
-                    global $query;
-                    $pattern = $_POST['search'];
-                    $project_name = $_POST['project_name'];
-                    $project_manager = $_POST['project_manager'];
-                    $task_assignee = $_POST['developer'];
-                    $query = "SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` , tasks.start_day, tasks.deadline
-                    FROM projects JOIN tasks ON projects.proj_name=tasks.proj_name ";
-                    $query .= (!empty($pattern)) ? "AND tasks.task_name LIKE '%" . $pattern . "%'" : "";
-                    $query .= (!empty($project_name)) ? "AND tasks.proj_name='" . $project_name . "' " : "";
-                    $query .= (!empty($task_assignee)) ? "AND tasks.task_assignee='" . $task_assignee . "'" : "";
-                    $query .= (!empty($project_managero)) ? "AND projects.proj_manager '" . $project_manager . "' " : "";
-                }
-                $query = mysqli_query($db, $query);
-            } else {
-                $query = $mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` , tasks.start_day, tasks.deadline
-                    FROM projects JOIN tasks ON projects.proj_name=tasks.proj_name ");
-            }
-
-            break;
-
-
-        case 'manager':
-
-            // ADDING NEW PROJECT BY MANAGER
+    if (array_key_exists($user['position'], $permission)) {
+        $action = 'add_new_task';
+        if (in_array($action, $permission[$user['position']]) !== FALSE) {
             $proj_name = $mysqli->query("SELECT  `proj_name`  FROM `Projects` WHERE `proj_manager` = '" . $user['email'] . "'");
             $developers = $mysqli->query("SELECT  `email`  FROM `Users` WHERE `position` = 'developer'");
             echo "<form action='#' method = 'POST'>
@@ -127,10 +46,7 @@ if (isset($_SESSION['email'])) {
         <input type="submit" name="save_task" value="Save Task">';
 
                 echo "</form>";
-
-
             } else {
-
                 if (isset($_POST['save_task'], $_POST['task_name'], $_POST['description'], $_POST['proj_name'], $_POST['assignee'], $_POST['start_day'], $_POST['deadline'])) {
                     $start_day = $_POST['start_day'];
                     $deadline = $_POST['deadline'];
@@ -143,12 +59,14 @@ if (isset($_SESSION['email'])) {
 
                     if (!empty($task_assignee) && !empty($task_name) && !empty($task_description) && !empty($proj_name)) {
                         $result = $mysqli->query("SELECT * FROM tasks WHERE proj_name = '$proj_name' AND task_name = '$task_name'") or die();
+
                         if ($result->num_rows > 0) {
                             echo "Task with the name " . $task_name . " for project " . $proj_name . " already exists";
-                            unset($_POST['newtask']);
+
 
                         }
-                        if (!mysqli_query($mysqli, $sql)) {
+                        $sql = mysqli_query($mysqli, $sql);
+                        if (!$sql) {
                             echo " Could not add the task";
                             mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
                             die();
@@ -167,162 +85,108 @@ if (isset($_SESSION['email'])) {
                     }
                 }
 
-
-                $query = $mysqli->query("SELECT tasks.proj_name, task_name, task_description, task_assignee, tasks.start_day, tasks.deadline
-                      FROM Tasks JOIN Projects 
-                      ON tasks.proj_name = projects.proj_name AND projects.proj_manager ='" . $user['email'] . "'
-                      ORDER BY tasks.proj_name ASC");
-                echo '<form action="" method="post">
-            <input type="text" name="search" placeholder="Search"></br>
-            <label>
-            <select name="project_name" size="1">
-            <option value="">Select a Project</option>';
-
-                $proj_name = $mysqli->query("SELECT  `proj_name`  FROM `Projects` WHERE projects.proj_manager='" . $user['email'] . "'");
-                while ($row = $proj_name->fetch_assoc()) {
-
-                    $project_name = $row['proj_name'];
-
-                    echo '<option value="' . $project_name . '"> ' . $project_name . '</option>';
-                }
-
-                echo '</select> </br>
-            </label>';
-
-                echo '<label>
-            <select name="developer" size="1">
-            <option value="">Select a Developer</option>';
-                $developers = $mysqli->query("SELECT DISTINCT firstname, lastname, email 
-                                                FROM users JOIN projects JOIN tasks
-                                                ON projects.proj_manager='" . $user['email'] . "'
-                                                AND tasks.task_assignee =users.email
-                                                AND tasks.proj_name=projects.proj_name   ");
-                while ($row = $developers->fetch_assoc()) {
-
-                    $assignee_email = $row['email'];
-                    $assignee_firstname = $row['firstname'];
-                    $assignee_lastname = $row['lastname'];
-
-                    echo "<option value='$assignee_email' > $assignee_firstname $assignee_lastname </option>";
-
-                }
-                echo '</select></br>
-            </label>
-            <input type="submit" name="searchbutton" value="Search">
-            </form>';
-                if (isset($_POST['searchbutton'], $_POST['search'], $_POST['project_name'], $_POST['developer'])) {
-                    global $query;
-                    $pattern = $_POST['search'];
-                    $project_name = $_POST['project_name'];
-                    $task_assignee = $_POST['developer'];
-                    $query = "SELECT DISTINCT tasks.proj_name, tasks.task_name ,tasks.task_description, tasks.task_assignee, tasks.start_day, tasks.deadline
-                    FROM projects JOIN tasks ON tasks.proj_name=projects.proj_name AND projects.proj_manager= '" . $user['email'] . "'";
-                    $query .= (!empty($pattern)) ? "AND tasks.task_name LIKE '%" . $pattern . "%'" : "";
-                    $query .= (!empty($project_name)) ? "AND tasks.proj_name='" . $project_name . "'" : "";
-                    $query .= (!empty($task_assignee)) ? "AND tasks.task_assignee= '" . $task_assignee . "'" : "";
-                    $query = mysqli_query($db, $query);
-                } else {
-                    $query = $mysqli->query("SELECT DISTINCT `tasks`.`proj_name`, `task_name`, `task_description`, `task_assignee` , tasks.start_day, tasks.deadline
-                    FROM projects JOIN tasks ON tasks.proj_name=projects.proj_name AND projects.proj_manager= '" . $user['email'] . "'");
-                }
-
-
             }
-
-            break;
-
-
-        case 'developer':
-
+        }
+        if (isset($_POST['newtask'])) {
+            die();
+        } else {
+        $action = 'search_in_tasks';
+        if (in_array($action, $permission[$user['position']]) !== FALSE) {
+            $pattern = isset($_POST['search']) && $_POST['search'] != '' ? $_POST['search'] : '';
+            $project_name = isset($_POST['project_name']) && $_POST['project_name'] != '' ? $_POST['project_name'] : '';
+            $task_assignee = isset($_POST['task_assignee']) && $_POST['task_assignee'] != '' ? $_POST['task_assignee'] : '';
             echo '<form action="" method="post">
-            <input type="text" name="search" placeholder="Search"></br>
-            <label>
-            <select name="project_name" size="1">
-            <option value="">Select a Project</option>';
-
-            $proj_name = $mysqli->query("SELECT DISTINCT proj_name FROM tasks WHERE tasks.task_assignee='" . $user['email'] . "' ");
+              <input type="text" name="search" placeholder="Search" value="' . $pattern . '"></br>
+              <select name="project_name" size="1">
+              <option value=""> Select a Project</option> ';
             while ($row = $proj_name->fetch_assoc()) {
-
-                $project_name = $row['proj_name'];
-
-                echo '<option value="' . $project_name . '"> ' . $project_name . '</option>';
+                echo '<option ' . ($project_name === $row['proj_name'] ? ' selected ' : '') . ' value="' . $row['proj_name'] . '"> ' . $row['proj_name'] . '</option>';
             }
-
-            echo '</select> </br>
-            </label>
-            <input type="submit" name="searchbutton" value="Search">
-            </form>';
-            if (isset($_POST['searchbutton'])) {
-                if (isset($_POST['searchbutton'], $_POST['search'], $_POST['project_name'])) {
-                    global $query;
-                    $pattern = $_POST['search'];
-                    $project_name = $_POST['project_name'];
-
-                        $query = "SELECT DISTINCT `tasks`.`proj_name`,`task_name`,`task_description`, `task_assignee` ,tasks.start_day, tasks.deadline
-                      FROM `tasks`
-                     WHERE `task_assignee` = '" . $user['email'] . "' ";
-                        $query .= (!empty($pattern)) ? "AND task_name LIKE '" . $pattern . "'" : "";
-                        $query .= (!empty($project_name)) ? "AND tasks.proj_name= '" . $project_name . "'" : "";
-                        $query = mysqli_query($db, $query);
-
-                }
+            echo '</select></br>
+              <select name="task_assignee" size="1">
+              <option value="">Select an Assignee</option> ';
+            while ($row = $developers->fetch_assoc()) {
+                echo '<option ' . ($task_assignee === $row['email'] ? ' selected ' : '') . ' value="' . $row['email'] . '"> ' . $row['email'] . '</option>';
             }
+            echo '</select></br>
+              <input type="submit" name="searchbutton" value="Search">';
+            global $query;
+            $query = "SELECT tasks.proj_name, task_name, task_description, task_assignee, tasks.start_day, tasks.deadline
+                 FROM Tasks JOIN Projects 
+                 ON tasks.proj_name = projects.proj_name AND projects.proj_manager ='" . $user['email'] . "'";
+            $query .= $pattern != '' ? "AND task_name LIKE '%" . $pattern . "%'" : "";
+            $query .= $project_name != '' ? "AND tasks.proj_name= '" . $project_name . "'" : "";
+            $query .= $task_assignee != '' ? "AND task_assignee = '" . $task_assignee . "'" : "";
+        }
 
-                else {
-                    $query = $mysqli->query("SELECT DISTINCT `tasks`.`proj_name`,`task_name`,`task_description`, `task_assignee` ,tasks.start_day, tasks.deadline
-                      FROM `tasks` JOIN `users`
-                      ON `task_assignee` = '" . $user['email'] . "' AND `email` = '" . $user['email'] . "'");
-                }
-
-
-                break;
-
-
-    }
-                if (isset($_POST['newtask'])) {
-                    die();
-                } else {
-
-
-                    echo "<table id = tasks> <caption>Tasks</caption>
+            echo "
+<table>
     <tr>
-    <th>Project Name</th>
-    <th>Task Name</th>
+    <th><input type='submit' name='proj_name' value='Project Name'></th>
+    <th><input type='submit' name='task_name' value='Task Name'></th>
     <th>Task Description</th>
-    <th>Task Assignee Email</th>
-    <th>Starting Date</th>
-    <th>Deadline</th>
+    <th><input type='submit' name='assignee' value='Task Assignee Email'></th>
+    <th><input type='submit' name='start_day' value='Starting Date'></th>
+    <th><input type='submit' name='deadline' value='Deadline'></th>
 </tr><tr>";
+            global $order;
 
-                    if (!$query) {
-//        var_dump($query);
-//        var_dump($project_manager);
-//        var_dump($pattern);
-//        var_dump($project_name);
-//        var_dump($task_assignee);
-//        printf("Error: %s\n", mysqli_error($db));
-                        exit();
-                    }
 
-                    while ($row = mysqli_fetch_array($query)) {
-                        echo "<td>" . $row['proj_name'] . "</td>
+            $order == (isset($_POST['proj_name']) && $order != '') ? $order = 'tasks.proj_name' : '';
+            $order == (isset($_POST['task_name']) && $order != '') ? $order = 'task_name' : '';
+            $order == (isset($_POST['assignee']) && $order != '') ? $order = 'task_assignee' : '';
+            $order == (isset($_POST['start_day']) && $order != '') ? $order = 'tasks.start_day' : '';
+            $order == (isset($_POST['deadline']) && $order != '') ? $order = 'tasks.deadline' : '';
+            $order == ($order == '') ? $order = 'tasks.proj_name' : $order;
+            $sort = 'ASC';
+            $query .= " ORDER BY $order $sort ";
+
+
+            $result = mysqli_query($db, $query);
+            $action = (!isset($_GET['action'])) ? 1 : $_GET['action'];
+            $perpage = 10;
+            $start_number = (($action - 1) * $perpage);
+            $total_elements = mysqli_num_rows($result);
+            $total_pages = ceil($total_elements / $perpage);
+
+            $query .= " LIMIT $start_number, $perpage";
+            $query = mysqli_query($db, $query);
+            if (!$query) {
+                printf("Error: %s\n", mysqli_error($db));
+                exit();
+            }
+
+            //Page Numbers' Links
+            for ($action = 1; $action <= $total_pages; $action++) {
+                echo '<a href="?action=' . $action . '">' . $action . '</a>';
+
+            }
+
+
+            while ($row = mysqli_fetch_array($query)) {
+
+
+                echo "<td>" . $row['proj_name'] . "</td>
            <td>" . $row['task_name'] . "</td>
            <td>" . $row['task_description'] . "</td>
            <td>" . $row['task_assignee'] . "</td>
            <td>" . $row['start_day'] . "</td>
            <td>" . $row['deadline'] . "</td>
            </tr>";
-                    }
+            }
 
-                    echo "<style>
+            echo "<style>
             table, th, td,tr {
             border: 1px solid black;
             }
           </style>";
-                    echo "</table><br>";
+            echo "</table><br></form>";
+
+        }
+
+    }
 
 
-                }
-            }
+}
 
-            ?>
+?>
