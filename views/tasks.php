@@ -58,11 +58,9 @@ if (isset($_SESSION['email'])) {
                 }
             }
         }
-        if (!isset($_POST['add_new_task']) && empty($_POST['add_new_task'])) {
-
-            $action = 'search_in_tasks';
-            if (in_array($action, $permission[$user['position']]) !== FALSE) {
-                echo '<form action="" method="post">
+        if (!isset($_POST['add_new_task'])) {
+            if (in_array('search_in_tasks', $permission[$user['position']]) !== FALSE) {
+                echo '<form action="tasks" method="post" id="taskform" name="taskform">
                         <input type="text" name="search" placeholder="Search"></br>
                         <select name="project_name" size="1">
                         <option value="">Select a Project </option>';
@@ -118,6 +116,7 @@ if (isset($_SESSION['email'])) {
 
                 $query = "SELECT DISTINCT tasks.proj_name, task_name, task_description, tasks.task_assignee, tasks.start_day, tasks.deadline 
                               FROM tasks JOIN projects ON tasks.proj_name=projects.proj_name";
+
                 $query .= (!empty($pattern)) ? " AND tasks.task_name LIKE '%" . $pattern . "%' " : "";
                 $query .= (!empty($project_name)) ? " AND tasks.proj_name = '" . $project_name . "' " : "";
                 $query .= (!empty($task_assignee)) ? " AND tasks.task_assignee='" . $task_assignee . "' " : "";
@@ -134,13 +133,13 @@ if (isset($_SESSION['email'])) {
                         <th><input type="submit" name="start_day" value="Starting Date"></th>
                         <th><input type="submit" name="deadline" value="Deadline"></th>
                         </tr>';
-                global $order;
-                $order == (isset($_POST['proj_name']) && $order != '') ? $order = 'tasks.proj_name' : '';
-                $order == (isset($_POST['task_name']) && $order != '') ? $order = 'task_name' : '';
-                $order == (isset($_POST['assignee']) && $order != '') ? $order = 'task_assignee' : '';
-                $order == (isset($_POST['start_day']) && $order != '') ? $order = 'tasks.start_day' : '';
-                $order == (isset($_POST['deadline']) && $order != '') ? $order = 'tasks.deadline' : '';
-                $order == ($order == '') ? $order = 'tasks.proj_name' : $order;
+
+                $order = isset($_POST['proj_name']) ? 'tasks.proj_name' : '';
+                $order = isset($_POST['task_name']) ? 'task_name' : $order;
+                $order = isset($_POST['assignee']) ? 'task_assignee' : $order;
+                $order = isset($_POST['start_day']) ? 'tasks.start_day' : $order;
+                $order = isset($_POST['deadline']) ? 'tasks.deadline' : $order;
+                $order = ($order == '') ? 'tasks.proj_name' : $order;
                 $sort = 'ASC';
                 $query .= " ORDER BY $order $sort ";
 
@@ -173,10 +172,15 @@ if (isset($_SESSION['email'])) {
                         table, th, td,tr { border: 1px solid black; }
                         </style></table><br></form>";
 
-                for ($action = 1; $action <= $total_pages; $action++) {
-                    echo '<a href="?action=' . $action . '">' . $action . '</a>';
+                for ($action = 0; $action < $total_pages; $action++) {
+//                    echo '<a onclick="document.getElementById(\'page\').value='.$action.'" href="?action=' . $action . '">' . ($action + 1)  . '</a>';
+                    echo '<button  onclick="document.getElementById(\'list_page\').value='.$action.'" onsubmit="document.getElementById(\'taskform\')">' . ($action + 1)  . '</button>';
+//                    echo '<script type="text/javascript">document.getElementById(\'taskform\').submit()</script>';
 
                 }
+
+
+                echo '<input id="list_page" value="" type="hidden">';
 
             }
         }

@@ -55,13 +55,13 @@ if (isset($_SESSION['email'])) {
                         <th><input type="submit" name="email" value="Email" </th>
                         </tr>';
 
-                global $order;
-                $order == (isset($_POST['firstname']) && $order != '') ? $order = 'users.firstname' : '';
-                $order == (isset($_POST['lastname']) && $order != '') ? $order = 'users.lastname' : '';
-                $order == (isset($_POST['email']) && $order != '') ? $order = 'users.email' : '';
-                $order == ($order == '') ? $order = 'users.firstname' : $order;
+                $order = isset($_POST['firstname']) ? 'firstname' : '';
+                $order = isset($_POST['lastname']) ? 'lastname' : $order;
+                $order = isset($_POST['email']) ? 'email' : $order;
+                $order = ($order == '') ? 'firstname' : $order;
                 $sort = 'ASC';
                 $query .= " ORDER BY $order $sort ";
+
 
 //Pagination starts here
                 $result = mysqli_query($db, $query);
