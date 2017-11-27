@@ -174,7 +174,7 @@ if (isset($_SESSION['email'])) {
 
                 for ($action = 0; $action < $total_pages; $action++) {
 //                    echo '<a onclick="document.getElementById(\'page\').value='.$action.'" href="?action=' . $action . '">' . ($action + 1)  . '</a>';
-                    echo '<button  onclick="document.getElementById(\'list_page\').value='.$action.'" onsubmit="document.getElementById(\'taskform\')">' . ($action + 1)  . '</button>';
+                    echo '<button  onclick="document.getElementById(\'list_page\').value='.$action.'" document.getElementById(\'taskform\').submit()">' . ($action + 1)  . '</button>';
 //                    echo '<script type="text/javascript">document.getElementById(\'taskform\').submit()</script>';
 
                 }
