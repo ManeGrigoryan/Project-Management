@@ -1,9 +1,11 @@
 <?php
+
 session_start();
 require 'dbconn.php';
 
 //require 'alltables.php';
 $page = isset($_REQUEST['page']) ? $_REQUEST['page'] : '';
+
 // Login
 if ($page == 'login' || $page == 'login.php') {
 //    header('Location: http://www.projectmanagement.com/login.php');
@@ -29,11 +31,13 @@ if (empty($_SESSION['email'])) {
 } else {
     $email = $_SESSION['email'];
     $result = $mysqli->query("SELECT * FROM Users WHERE email = '$email'");
+    global $user;
     $user = $result->fetch_assoc();
 
 }
 
 require 'views/permissions.php';
+require 'views/functions.php';
 require('header.php');
 require('content.php');
 require('footer.php');

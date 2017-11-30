@@ -1,6 +1,5 @@
 <?php
-//var_dump(987987);
-//die();
+
 require 'dbconn.php';
 if (isset($_SESSION['email'])) {
     echo "You are already logged in as " . $_SESSION['email'] . " If it is not You then log out and then log in with your email address";
