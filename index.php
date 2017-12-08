@@ -36,6 +36,7 @@ require 'dbconn.php';
 //require 'alltables.php';
 $route = isset($_REQUEST['route']) ? $_REQUEST['route'] : '';
 $routesArr = explode('/', $route);
+global $page;
 $page = $routesArr[0];
 $action = isset($routesArr[1]) ? $routesArr[1] : null;
 

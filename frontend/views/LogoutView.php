@@ -15,14 +15,13 @@ class LogoutView extends View
         $this->model = $model;
     }
     public function logout(){
-        echo "You are now logged out " . $_SESSION['email'];
 
+        echo "You are now logged out " . $_SESSION['email'];
         session_destroy();
         header('refresh:1','Location: http://www.projectmanagement.com/login');
         exit();
     }
     public function notLogged(){
-
         ?>
         No user has been logged in, in order to log out from the system.
         <?php

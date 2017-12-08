@@ -22,11 +22,18 @@ class TasksView extends View
         global $total_pages;
         global $action;
         $tasks = $this->model->getTasks();
-        $permission= $this->model->getPermission($action);
+        $permission = $this->model->getPermission($action);
+        $task_name = (isset($_GET['search']) && $_GET['search'] != '') ? $_GET['search'] : '';
+        $sort = isset($_GET['sort']) ? $_GET['sort'] : 'DESC';
+        $order = isset($_GET['order']) ? $_GET['order'] : 'proj_name';
         ?>
-        <form action="/tasks" method="GET">
+
+        <form action="/tasks" method="GET" id="tasks_">
             <a href="tasks/add">Add</a></br>
-            <input type="text" name="search" placeholder="Search">
+            <input type="text" name="search" placeholder="Search" selected="<?php echo $task_name ?>">
+            <input type="hidden" name="order" value="<?php echo isset($_GET['order']) ? $_GET['order'] : 'proj_name' ?>"
+                   id="order">
+            <input type="hidden" name="sort" value="" id="sort">
             <?php
             $projects = $this->model->getProjects();
             if ($user['position'] == 'manager' || $user['position'] == 'developer') {
@@ -39,41 +46,68 @@ class TasksView extends View
             if ($user['position'] != 'developer') {
                 $assignees = $this->model->getAssignees();
             }
-
-
             ?>
-
-            <input type="submit" name="searchbutton" value="Search">
-            <table>
+            <button onclick="searchFunction()">Search</button>
+            <table id="tasks_table">
+                <thead>
                 <tr>
-                    <th><input type="submit" name="proj_name" value="Project Name"></th>
-                    <th><input type="submit" name="task_name" value="Task Name"></th>
-                    <th><input type="submit" name="task_description" value="Task Description"</th>
-                    <th><input type="submit" name="assignee" value="Task Assignee Email"></th>
-                    <th><input type="submit" name="start_day" value="Starting Date"></th>
-                    <th><input type="submit" name="deadline" value="Deadline"></th>
+                    <th><a data-sort-by="<?php echo $sort; ?>"
+                           data-order-by="<?php echo ($order == 'proj_name') ? 'yes' : 'no'; ?>" href=""
+                           onclick="event.preventDefault();orderTable('proj_name', 'tasks_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">Project
+                            Name</a></th>
+                    <th><a data-sort-by="<?php echo $sort; ?>"
+                           data-order-by="<?php echo ($order == 'task_name') ? 'yes' : 'no'; ?>" href=""
+                           onclick="event.preventDefault();orderTable('task_name', 'tasks_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">Task
+                            Name</a></th>
+                    <th><a data-sort-by="<?php echo $sort; ?>"
+                           data-order-by="<?php echo ($order == 'description') ? 'yes' : 'no'; ?>" href=""
+                           onclick="event.preventDefault();orderTable('description', 'tasks_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">Task
+                            Description</th>
+                    <th><a data-sort-by="<?php echo $sort; ?>"
+                           data-order-by="<?php echo ($order == 'task_assignee') ? 'yes' : 'no'; ?>" href=""
+                           onclick="event.preventDefault();orderTable('task_assignee', 'tasks_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">Task
+                            Assignee Email</th>
+                    <th><a data-sort-by="<?php echo $sort; ?>"
+                           data-order-by="<?php echo ($order == 'start_day') ? 'yes' : 'no'; ?>" href=""
+                           onclick="event.preventDefault();orderTable('start_day', 'tasks_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">
+                            Starting Date</th>
+                    <th><a data-sort-by="<?php echo $sort; ?>"
+                           data-order-by="<?php echo ($order == 'deadline') ? 'yes' : 'no'; ?>" href=""
+                           onclick="event.preventDefault();orderTable('deadline', 'tasks_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">Deadline
+                    </th>
                 </tr>
+                </thead>
                 <?php
-                foreach ($tasks as $task) {
-                    ?>
-                    <tr>
-                        <td><?php echo $task['proj_name']; ?>  </td>
-                        <td><?php echo $task['task_name']; ?></td>
-                        <td><?php echo $task['task_description']; ?></td>
-                        <td><?php echo $task['task_assignee']; ?></td>
-                        <td><?php echo $task['start_day']; ?></td>
-                        <td><?php echo $task['deadline']; ?></td>
-                    </tr>
+                foreach ($tasks
+
+                as $task) {
+                ?>
+                <tbody>
+                <tr>
+                    <td><?php echo $task['proj_name']; ?>  </td>
+                    <td><?php echo $task['task_name']; ?></td>
+                    <td><?php echo $task['task_description']; ?></td>
+                    <td><?php echo $task['task_assignee']; ?></td>
+                    <td><?php echo $task['start_day']; ?></td>
+                    <td><?php echo $task['deadline']; ?></td>
+                </tr>
                 <?php }
                 ?>
-
+                </tbody>
             </table>
             <br>
         </form>
         <?php
+        $location = $_SERVER['REQUEST_URI'];
+        $urlArr = explode('?', $location);
+        $queryParamsStr = isset($urlArr[1]) ? $urlArr[1] : '';
+        parse_str($queryParamsStr, $queryParamsArr);
         for ($action = 1; $action <= $total_pages; $action++) {
+            $newQueryParams = array_merge($queryParamsArr, ['action' => $action]);
+            $newQueryParamStr = http_build_query($newQueryParams);
+            $newUrl = implode('?', [$urlArr[0], $newQueryParamStr]);
             ?>
-            <a href="?action=<?php echo $action ?>" onclick="changePage(<?php echo $action ?>)"><?php echo $action ?></a>
+            <a href="<?php echo $newUrl; ?>"><?php echo $action ?></a>
             <?php
         }
     }
@@ -86,7 +120,7 @@ class TasksView extends View
     public function add()
     {
         global $action;
-        $permission= $this->model->getPermission($action);
+        $permission = $this->model->getPermission($action);
 
 
         ?>
@@ -101,7 +135,7 @@ class TasksView extends View
             <label> Deadline:</label><input type="date" name="deadline" value="Deadline" required></br></label>
             <input type="submit" name="save_task" value="Save Task"></form>
         <?php
-        $adding=$this->model->getAdds();
+        $adding = $this->model->getAdds();
 
     }
 }

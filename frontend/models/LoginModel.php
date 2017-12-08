@@ -9,7 +9,6 @@
 class LoginModel extends Model
 {
     public function newLogCheck(){
-//        var_dump(3);
         global $mysqli;
         $email = $mysqli->escape_string($_POST['email']);
         $result = $mysqli->query("SELECT * FROM Users WHERE email = '$email'");
@@ -22,6 +21,7 @@ class LoginModel extends Model
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['first_name'] = $user['firstname'];
                 $_SESSION['last_name'] = $user['lastname'];
+
                 session_write_close();
                 header("Location: http://www.projectmanagement.com/profile");
                 die();

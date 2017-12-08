@@ -67,6 +67,7 @@ class ProjectsView extends View
         global $action;
         $permission= $this->model->getPermission($action);
 
+
         ?>
         <form action="" method="get">
             <input type="text" placeholder="Project Name" name="project_name"></br>

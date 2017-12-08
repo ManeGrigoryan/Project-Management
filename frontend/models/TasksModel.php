@@ -27,17 +27,12 @@ class TasksModel extends Model
         $query .= ($user['position'] == 'manager') ? " AND proj_manager = '" . $user['email'] . "' " : "";
         $query .= ($user['position'] == 'developer') ? " AND task_assignee = '" . $user['email'] . "' " : "";
         $query .= ($user['position'] == 'admin') ? " " : "";
-//        var_dump($query);
 
-        $order = isset($_GET['proj_name']) ? 'tasks.proj_name' : '';
-        $order = isset($_GET['task_name']) ? 'task_name' : $order;
-        $order = isset($_GET['assignee']) ? 'task_assignee' : $order;
-        $order = isset($_GET['start_day']) ? 'tasks.start_day' : $order;
-        $order = isset($_POST['deadline']) ? 'tasks.deadline' : $order;
-        $order = ($order == '') ? 'tasks.proj_name' : $order;
-        $sort = 'ASC';
+        // Ordering
+        $order = isset($_GET['order']) ? $_GET['order'] : 'proj_name';
+        $sort = isset($_GET['sort']) ? $_GET['sort'] : 'ASC';
         $query .= " ORDER BY $order $sort ";
-
+        // Pagination
         $result = mysqli_query($mysqli, $query);
         $action = (!isset($_GET['action'])) ? 1 : $_GET['action'];
         $perpage = 10;

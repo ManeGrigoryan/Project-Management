@@ -16,9 +16,9 @@ class Model
         $project_names .= ($user['position'] == 'admin') ? " WHERE 1" : "";
         $project_names == ($user['position'] == 'developer') ? "SELECT  DISTINCT  proj_name FROM projects JOIN tasks ON task_assignee = '" . $user['email'] . "'" : $project_names;
         $project_names = mysqli_query($mysqli, $project_names);
-        $project_name = (isset($_GET['project_name']) && $_GET['project_name'] != '') ? $_GET['$project_name'] : '';
+        $project_name = (isset($_GET['project_name']) && $_GET['project_name'] != '') ? $_GET['project_name'] : '';
         while ($row = $project_names->fetch_assoc()) {
-            echo '<option ' . (($project_name === $row['proj_name']) ? ' selected ' : '') . ' value="' . $row['proj_name'] . '"> ' . $row['proj_name'] . '</option>';
+            echo '<option ' . (($project_name === $row['proj_name']) ? ' selected ' : '') . ' value="' . $row['proj_name'] . '"> ' . $row['proj_name'].  '</option>';
         }
         echo '</select>';
 
@@ -68,7 +68,6 @@ class Model
             if (in_array($action, $permission[$user['position']]) !== FALSE) {
                 echo '</br>';
             } else {
-                var_dump(5);
                 echo 'You are not allowed to do this ' . $action . ' action';
                 die();
             }
