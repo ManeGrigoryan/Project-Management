@@ -22,12 +22,12 @@ class ProjectsModel extends Model
         $query .= " ORDER BY $order $sort ";
         $result = mysqli_query($mysqli, $query);
         $action = (!isset($_GET['action'])) ? 1 : $_GET['action'];
-        $perpage = 10;
-        $start_number = (($action - 1) * $perpage);
-        $total_elements = mysqli_num_rows($result);
-        $total_pages = ceil($total_elements / $perpage);
-
-        $query .= " LIMIT $start_number, $perpage";
+//        $perpage = 10;
+//        $start_number = (($action - 1) * $perpage);
+//        $total_elements = mysqli_num_rows($result);
+//        $total_pages = ceil($total_elements / $perpage);
+//
+//        $query .= " LIMIT $start_number, $perpage";
         $query = mysqli_query($mysqli, $query);
 
         if (!$query) {

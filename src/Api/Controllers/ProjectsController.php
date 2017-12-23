@@ -19,12 +19,15 @@ class ProjectsController extends Controller
        $order = isset($_GET['order']) ? $_GET['order'] : 'proj_name';
        $pattern = isset($_GET['search'])? $_GET['search']:'';
        $project_manager=(isset($_GET['search_projectManager']) && $_GET['search_projectManager'] != '')? $_GET['search_projectManager']: '';
+       $project_name = (isset($_GET['search_projectName']) && $_GET['search_projectName'] != '') ? $_GET['search_projectName'] : '';
+       $task_assignee = isset($_GET['search_taskAssignee']) && $_GET['search_taskAssignee'] != '' ? $_GET['search_taskAssignee'] : '';
        $permission=$models->getPermission($action);
-       $searchManager=$models->searchByManagers();
-       var_dump($searchManager);
-       if($permission==TRUE){
-           $searchProjects=$models->searchByProjects();
-       }
+       $searchManager=$models->getManagers();
+       $searchProjects=$models->getProjects();
+       $searchAssignees=$models->getAssignees();
+//       if($permission==TRUE){
+//           $searchProjects=$models->searchByProjects();
+//       }
        $projectsModel= new ProjectsModel();
        $getProjectsTable=$projectsModel->getProjectsTable();
         return $view->render($response, 'projects.twig', array(
@@ -33,7 +36,11 @@ class ProjectsController extends Controller
             'sort'=>$sort,
             'permission'=>$permission,
             'project_manager'=>$project_manager,
+            'project_name'=>$project_name,
+//            'task_assignee'=>$task_assignee,
             'searchManager'=>$searchManager,
+            'searchProject'=>$searchProjects,
+//            'searchAssignee' => $searchAssignees,
             'tableData'=>$getProjectsTable
         ));
 

@@ -2,35 +2,99 @@
 <form action="/projects" method="GET" id="projects_">
     <a href="projects/add">Add</a></br>
     {% if permission==true %}
-    <input type="text" name="search" placeholder="Search" value="{{ pattern }}"></br>
-    <select name="search_projectManager" size="1">
-        <option value=""> Select a Manager</option>
-        {% for manager in searchManager %}
-                {% if {{ project_manager }} =={{ manager.email }}  %}
+        <input type="text" name="search" placeholder="Search" value="{{ pattern }}"></br>
+        <select name="search_projectManager" size="1">
+            <option value=""> Select a Manager</option>
+            {% for manager in searchManager %}
+                {% if  project_manager  == manager.email %}
                     {% set selected = 'selected' %}
                 {% else %} {% set selected = '' %}
                 {% endif %}
-            <option value="{{ manager.email }}" {{ selected }}> {{ manager.firstname }} {{ manager.lastname }}</option>
-        {% endfor %}
-    </select>
-        <button onclick="searchFunction('projects_table')">Search</button>
-        {% endif %}
-        <input type="hidden" name="order" value="{{ order }}" id="order">
-        <input type="hidden" name="sort" value="" id="sort">
-        <table id="projects_table">
-            <th> Project Name</th>
-            <th> Project Description</th>
-            <th> Project Manager</th>
-            <th> Start Day</th>
-            <th> Deadline</th>
-            {% for row in tableData %}
-                <tr>
-                    <td>{{ row.proj_name }}</td>
-                    <td>{{ row.description }}</td>
-                    <td>{{ row.proj_manager }}</td>
-                    <td>{{ row.start_day }}</td>
-                    <td>{{ row.deadline }}</td>
-                </tr>
+                <option value="{{ manager.email }}" {{ selected }}> {{ manager.firstname }} {{ manager.lastname }}</option>
             {% endfor %}
-        </table>
+        </select>
+        <select name="search_projectName" size="1">
+            <option value=""> Select a Project</option>
+            {% for project in searchProject %}
+                {% if  project_name  == project.proj_name %}
+                    {% set selected = 'selected' %}
+                {% else %} {% set selected = '' %}
+                {% endif %}
+                <option value="{{ project.proj_name }}" {{ selected }}> {{ project.proj_name }}</option>
+            {% endfor %}
+        </select>
+        {#<select name="search_taskAssignee" size="1">#}
+        {#<option value=""> Select an Assignee</option>#}
+        {#{% for assignee in searchAssignee %}#}
+        {#{% if  task_assignee  == assignee.email %}#}
+        {#{% set selected = 'selected' %}#}
+        {#{% else %} {% set selected = '' %}#}
+        {#{% endif %}#}
+        {#<option value="{{ assignee.email }}" {{ selected }}> {{ assignee.email }}</option>#}
+        {#{% endfor %}#}
+        {#</select>#}
+        <button onclick="searchFunction('projects_table')">Search</button>
+    {% endif %}
+    <input type="hidden" name="order" value="{{ order }}" id="order">
+    <input type="hidden" name="sort" value="" id="sort">
+    <table id="projects_table">
+        <thead>
+        <tr>
+            <th><a data-sort-by="{{ sort }}"
+                   data-order-by="{% if order == 'proj_name' %}
+                                {% set item = 'yes' %}
+                                {% else %}
+                                {% set item = 'no' %}
+                                {% endif %}
+                                {{ item }}" href=""
+                   onclick="event.preventDefault();orderTable('proj_name', 'projects_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">Project
+                    Name</a></th>
+            <th><a data-sort-by="{{ sort }}"
+                   data-order-by="{% if order == 'description' %}
+                                {% set item = 'yes' %}
+                                {% else %}
+                                {% set item = 'no' %}
+                                {% endif %}
+                                {{ item }}" href=""
+                   onclick="event.preventDefault();orderTable('description', 'projects_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">Project
+                    Description </a></th>
+            <th><a data-sort-by="{{ sort }}"
+                   data-order-by="{% if order == 'proj_manager' %}
+                                {% set item = 'yes' %}
+                                {% else %}
+                                {% set item = 'no' %}
+                                {% endif %}
+                                {{ item }}" href=""
+                   onclick="event.preventDefault();orderTable('proj_manager', 'projects_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">Task
+                    Project Manager</a></th>
+            <th><a data-sort-by="{{ sort }}"
+                   data-order-by="{% if order == 'start_day' %}
+                                {% set item = 'yes' %}
+                                {% else %}
+                                {% set item = 'no' %}
+                                {% endif %}
+                                {{ item }}" href=""
+                   onclick="event.preventDefault();orderTable('start_day', 'projects_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">
+                    Starting Date</a></th>
+            <th><a data-sort-by="{{ sort }}"
+                   data-order-by="{% if order == 'deadline' %}
+                                {% set item = 'yes' %}
+                                {% else %}
+                                {% set item = 'no' %}
+                                {% endif %}
+                                {{ item }}" href=""
+                   onclick="event.preventDefault();orderTable('deadline', 'projects_', this.getAttribute('data-order-by'), this.getAttribute('data-sort-by'));">Deadline
+                </a></th>
+        </tr>
+        </thead>
+        {% for row in tableData %}
+            <tr>
+                <td>{{ row.proj_name }}</td>
+                <td>{{ row.description }}</td>
+                <td>{{ row.proj_manager }}</td>
+                <td>{{ row.start_day }}</td>
+                <td>{{ row.deadline }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 </form>

@@ -14,7 +14,13 @@
 
     }
     function orderTable(column, formId, orderby, sortby) {
-        document.getElementById('order').value = column;
+        console.log(column);
+            console.log(formId);
+            console.log(orderby);
+            console.log(sortby);
+
+
+            document.getElementById('order').value = column;
         if (orderby == 'yes') {
             document.getElementById('sort').value = sortby == 'ASC' ? 'DESC' : 'ASC';
         } else {
