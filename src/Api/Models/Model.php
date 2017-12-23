@@ -91,7 +91,7 @@ class Model
         $project_names = "SELECT DISTINCT proj_name FROM projects";
         $project_names .= ($user['position'] == 'manager') ? " WHERE proj_manager='" . $user['email'] . "'" : "";
         $project_names .= ($user['position'] == 'admin') ? " WHERE 1" : "";
-        $project_names == ($user['position'] == 'developer') ? "SELECT  DISTINCT  proj_name FROM projects JOIN tasks ON task_assignee = '" . $user['email'] . "'" : $project_names;
+        $project_names == ($user['position'] == 'developer') ? $project_names="SELECT  DISTINCT  projects.proj_name FROM projects JOIN tasks ON task_assignee = '".$user['email']."' AND tasks.proj_name=projects.proj_name" : $project_names;
         $project_names = mysqli_query($mysqli, $project_names);
         $project_name = (isset($_GET['search_projectName']) && $_GET['search_projectName'] != '') ? $_GET['search_projectName'] : '';
         $data = array();
@@ -138,10 +138,10 @@ class Model
         global $user;
         $container = $app->getContainer();
         $mysqli = $container->get('mysql');
-        $project_managers = "SELECT firstname, lastname, email FROM users WHERE position='manager'";
-        $project_managers .= ($user['position'] == 'manager') ? " WHERE proj_manager='" . $user['email'] . "'" : "";
+        $project_managers = "SELECT DISTINCT  firstname, lastname, email FROM users JOIN projects ON position='manager'";
+        $project_managers .= ($user['position'] == 'manager') ? " AND proj_manager='" . $user['email'] . "' AND users.email='".$user['email']."'" : "";
         $project_managers .= ($user['position'] == 'admin') ? " AND 1" : "";
-        $project_managers == ($user['position'] == 'developer') ? "SELECT DISTINCT firstname, lastname, email FROM users JOIN tasks JOIN projects
+        $project_managers == ($user['position'] == 'developer') ? $project_managers="SELECT DISTINCT firstname, lastname, email FROM users JOIN tasks JOIN projects
                                                                     ON projects.proj_manager=users.email AND tasks.task_assignee = '" . $user['email'] . "'
                                                                     AND tasks.proj_name=projects.proj_name" : $project_managers;
 

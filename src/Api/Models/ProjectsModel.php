@@ -15,19 +15,18 @@ class ProjectsModel extends Model
         $query .= (!empty($_GET['search_projectName'])) ? " AND projects.proj_name = '" . $_GET['search_projectName'] . "' " : "";
         $query .= (!empty($_GET['search_projectManager'])) ? " AND projects.proj_manager ='" . $_GET['search_projectManager'] . "' " : "";
         $query .= ($user['position'] == 'manager') ? " AND proj_manager = '" . $user['email'] . "' " : "";
-        $query .= ($user['position'] == 'developer') ? " AND task_assignee = '" . $user['email'] . "' " : "";
+        $query .= ($user['position'] == 'developer') ? " AND task_assignee = '" . $user['email'] . "' AND projects.proj_name=tasks.proj_name " : "";
         $query .= ($user['position'] == 'admin') ? " " : "";
         $order = isset($_GET['order']) ? $_GET['order'] : 'proj_name';
         $sort = isset($_GET['sort']) ? $_GET['sort'] : 'ASC';
         $query .= " ORDER BY $order $sort ";
         $result = mysqli_query($mysqli, $query);
         $action = (!isset($_GET['action'])) ? 1 : $_GET['action'];
-//        $perpage = 10;
-//        $start_number = (($action - 1) * $perpage);
-//        $total_elements = mysqli_num_rows($result);
-//        $total_pages = ceil($total_elements / $perpage);
-//
-//        $query .= " LIMIT $start_number, $perpage";
+        $perpage = 10;
+        $start_number = (($action - 1) * $perpage);
+        $total_elements = mysqli_num_rows($result);
+        $total_pages = ceil($total_elements / $perpage);
+        $query .= " LIMIT $start_number, $perpage";
         $query = mysqli_query($mysqli, $query);
 
         if (!$query) {

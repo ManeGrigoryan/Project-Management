@@ -26,8 +26,9 @@ $app->group('', function () use ($app) {
     });
     $this->group('/projects', function () {
         $this->get('', ProjectsController::class . ':list_');
+        $this->post('', ProjectsController::class . ':save');
         $this->get('/add', ProjectsController::class . ':add');
-        $this->post('/add', ProjectsController::class . ':save');
+//        $this->post('/add', ProjectsController::class . ':save');
     });
     $this->group('/tasks', function () {
         $this->get('', TasksController::class . ':list_');
