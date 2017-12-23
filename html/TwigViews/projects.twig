@@ -1,0 +1,36 @@
+{% include 'index.twig' %}
+<form action="/projects" method="GET" id="projects_">
+    <a href="projects/add">Add</a></br>
+    {% if permission==true %}
+    <input type="text" name="search" placeholder="Search" value="{{ pattern }}"></br>
+    <select name="search_projectManager" size="1">
+        <option value=""> Select a Manager</option>
+        {% for manager in searchManager %}
+                {% if {{ project_manager }} =={{ manager.email }}  %}
+                    {% set selected = 'selected' %}
+                {% else %} {% set selected = '' %}
+                {% endif %}
+            <option value="{{ manager.email }}" {{ selected }}> {{ manager.firstname }} {{ manager.lastname }}</option>
+        {% endfor %}
+    </select>
+        <button onclick="searchFunction('projects_table')">Search</button>
+        {% endif %}
+        <input type="hidden" name="order" value="{{ order }}" id="order">
+        <input type="hidden" name="sort" value="" id="sort">
+        <table id="projects_table">
+            <th> Project Name</th>
+            <th> Project Description</th>
+            <th> Project Manager</th>
+            <th> Start Day</th>
+            <th> Deadline</th>
+            {% for row in tableData %}
+                <tr>
+                    <td>{{ row.proj_name }}</td>
+                    <td>{{ row.description }}</td>
+                    <td>{{ row.proj_manager }}</td>
+                    <td>{{ row.start_day }}</td>
+                    <td>{{ row.deadline }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+</form>
