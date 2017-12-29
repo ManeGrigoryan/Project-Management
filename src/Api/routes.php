@@ -16,6 +16,8 @@ use App\Api\Controllers\SignupController;
 use App\Api\Models\UsersModel;
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
+use Doctrine\Common\Util\Debug;
+
 
 $app->group('', function () use ($app) {
     $this->any('/', function (Request $request, Response $response) {

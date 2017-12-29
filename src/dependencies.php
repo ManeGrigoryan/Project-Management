@@ -2,6 +2,8 @@
 global $app;
 
 use \Psr\Http\Message\ServerRequestInterface;
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
 
 $container = $app->getContainer();
 $container['mysql'] = function ($container) {
@@ -27,5 +29,32 @@ $container['view'] = function ($container) {
     $view->addExtension(new Slim\Views\TwigExtension($container['router'], $basePath));
     return $view;
 };
+$container['entitymanager']=function (){
+
+//    $isDevMode = true;
+//    $config = Setup::createAnnotationMetadataConfiguration(array(__DIR__."/src"), $isDevMode);
+//    $db=$app->getContainer()->get('pdo');
+//    $entityManager = EntityManager::create($settings,$config);
+
+
+
+
+    $paths = array("");
+    $isDevMode = false;
+
+// the connection configuration
+    $dbParams = array(
+        'driver'   => 'pdo_mysql',
+        'user'     => 'root',
+        'password' => '',
+        'dbname'   => 'test_db',
+        'host'   => 'localhost',
+    );
+
+    $config = Setup::createAnnotationMetadataConfiguration($paths, $isDevMode);
+    $entityManager = EntityManager::create($dbParams, $config);
+//$entityManager->get
+    return $entityManager;
+}
 
 ?>

@@ -7,16 +7,26 @@ use App\Api\Models\ProjectsModel;
 use \Slim\Http\Response;
 use \Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Doctrine\Common\Util\Debug;
 
 class ProjectsController extends Controller
 {
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @return mixed
+     */
     public function list_(Request $request, Response $response)
     {
         global $app;
         global $total_pages;
 
         $view = $app->getContainer()->get('view');
-        $models = new Model;
+//        $entityManager = $app->getContainer()->get('entitymanager');
+//        echo '<pre>';
+//        print_r($entityManager);
+//        die();
+        $models = new Model();
         $action = 'search_in_projects';
         $sort = isset($_GET['sort']) ? $_GET['sort'] : 'ASC';
         $order = isset($_GET['order']) ? $_GET['order'] : 'proj_name';

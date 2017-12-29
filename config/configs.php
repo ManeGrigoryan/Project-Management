@@ -8,7 +8,7 @@
 return [
     'settings' => [
         'displayErrorDetails' => true,
-        'mysql' => [
+        'doctrine' => [
             'host' => '',
             'database' => '',
             'username' => '',

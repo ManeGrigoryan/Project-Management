@@ -38,11 +38,11 @@
                    <select name="search_projectName" size="1">
                        <option value=""> Select a Project</option>
                        {% for project in searchProject %}
-                           {% if  project_name  == project.proj_name %}
+                           {% if  project_name  == project.projName %}
                                {% set selected = 'selected' %}
                            {% else %} {% set selected = '' %}
                            {% endif %}
-                           <option value="{{ project.proj_name }}" {{ selected }}> {{ project.proj_name }}</option>
+                           <option value="{{ project.projName }}" {{ selected }}> {{ project.projName }}</option>
                        {% endfor %}
                    </select></br>
                    <button onclick="searchFunction('projects_table')">Search</button>

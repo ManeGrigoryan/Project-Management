@@ -1,6 +1,10 @@
 <?php
 
 namespace App\Api\Models;
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\Common\Util\Debug;
+include 'C:\wamp64\www\project-management\vaxo\Projects.php';
+include 'C:\wamp64\www\project-management\vaxo\Tasks.php';
 global $app;
 global $user;
 $container = $app->getContainer();
@@ -86,20 +90,89 @@ class Model
     {
         global $app;
         global $user;
-        $container = $app->getContainer();
-        $mysqli = $container->get('mysql');
-        $project_names = "SELECT DISTINCT proj_name FROM projects";
-        $project_names .= ($user['position'] == 'manager') ? " WHERE proj_manager='" . $user['email'] . "'" : "";
-        $project_names .= ($user['position'] == 'admin') ? " WHERE 1" : "";
-        $project_names == ($user['position'] == 'developer') ? $project_names="SELECT  DISTINCT  projects.proj_name FROM projects JOIN tasks ON task_assignee = '".$user['email']."' AND tasks.proj_name=projects.proj_name" : $project_names;
-        $project_names = mysqli_query($mysqli, $project_names);
-        $project_name = (isset($_GET['search_projectName']) && $_GET['search_projectName'] != '') ? $_GET['search_projectName'] : '';
-        $data = array();
-        while ($row = $project_names->fetch_assoc()) {
-            $data[] = $row;
-        }
-        return $data;
+        $em=$app->getContainer()->get('entitymanager');
+        global $app;
+        global $user;
 
+        switch ($user['position']){
+            case 'manager':
+                $project_names=$em->createQueryBuilder('p')
+                    ->select('p.projName')
+                    ->from('Projects', 'p')
+                    ->andWhere('p.projManager =:email')
+                    ->setParameter('email', $user['email'])
+                    ->distinct()
+                    ->getQuery()
+                    ->execute();
+                break;
+            case 'admin':
+                $project_names=$em->createQueryBuilder('p')
+                    ->select('p.projName')
+                    ->from('Projects', 'p')
+                    ->distinct()
+                    ->getQuery()
+                    ->execute();
+                break;
+            case 'developer':
+                $project_names=$em->createQueryBuilder('p')
+                    ->select('t.projName')
+                    ->from('Tasks', 't')
+                    ->andWhere('t.taskAssignee=:email')
+                    ->setParameter('email', $user['email'])
+                    ->leftJoin('Projects', 'p', 'p.projName=t.projName')
+                    ->distinct()
+                    ->getQuery()
+                    ->execute();
+                break;
+        }
+        
+        return $project_names;
+
+//        $em->
+//        $ps = $em->findAll('Projects');
+//        $q = $em->createQuery("select p from Projects p");
+//        $projects = $q->getResult();
+//        echo '<pre>';
+//        $ps = $em->find('Projects', '1');
+//        var_dump($ps->getDescription());
+//        die();
+////echo ''
+//        var_dump($project_names);
+//        die();
+//        $data=array();
+//        $project = new \Projects();
+//        var_dump($project_names[0]);
+//        var_dump($project->getProjName($project_names[]));
+//        die();
+//        for($i=0; $i<sizeof($project_names); $i++){
+//            $data=$project->getProjName($project_names[$i]);
+//        }
+//        return $data;
+
+
+
+//        die();
+//        while ($row = $project_names->getProjName()) {
+//            $data[] = $row;
+//        }
+//        return $data;
+
+
+
+//        $container = $app->getContainer();
+//        $mysqli = $container->get('mysql');
+//        $project_names = "SELECT DISTINCT proj_name FROM projects";
+//        $project_names .= ($user['position'] == 'manager') ? " WHERE proj_manager='" . $user['email'] . "'" : "";
+//        $project_names .= ($user['position'] == 'admin') ? " WHERE 1" : "";
+//        $project_names == ($user['position'] == 'developer') ? $project_names="SELECT  DISTINCT  projects.proj_name FROM projects JOIN tasks ON task_assignee = '".$user['email']."' AND tasks.proj_name=projects.proj_name" : $project_names;
+//        $project_names = mysqli_query($mysqli, $project_names);
+//        $project_name = (isset($_GET['search_projectName']) && $_GET['search_projectName'] != '') ? $_GET['search_projectName'] : '';
+//        $data = array();
+//        while ($row = $project_names->fetch_assoc()) {
+//            $data[] = $row;
+//        }
+//        return $data;
+//
     }
 
     public function getAssignees()

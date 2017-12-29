@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Api\Models;
+use App\vaxo;
 class ProjectsModel extends Model
 {
     public function getProjectsTable()
