@@ -20,7 +20,7 @@ class ProjectsController extends Controller
     {
         global $app;
         global $total_pages;
-
+        $em=$app->getContainer()->get('entitymanager');
         $view = $app->getContainer()->get('view');
 //        $entityManager = $app->getContainer()->get('entitymanager');
 //        echo '<pre>';
@@ -35,8 +35,8 @@ class ProjectsController extends Controller
         $project_name = (isset($_GET['search_projectName']) && $_GET['search_projectName'] != '') ? $_GET['search_projectName'] : '';
         $task_assignee = isset($_GET['search_taskAssignee']) && $_GET['search_taskAssignee'] != '' ? $_GET['search_taskAssignee'] : '';
         $permission = $models->getPermission($action);
-        $searchManager = $models->getManagers();
-        $searchProjects = $models->getProjects();
+        $searchManager = $models->getManagers($em);
+        $searchProjects = $models->getProjects($em);
 //       if($permission==TRUE){
 //           $searchProjects=$models->searchByProjects();
 //       }

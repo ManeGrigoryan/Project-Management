@@ -14,11 +14,12 @@ class ProfileController extends Controller
         global $app;
         $view = $app->getContainer()->get('view');
         global $user;
+        $element=$user['0'];
         return $view->render($response, 'profile.twig', array(
-            'firstname' => $user['firstname'],
-            'lastname' => $user['lastname'],
-            'position' => $user['position'],
-            'email' => $user['email']
+            'firstname' => $user[$element['firstname']],
+            'lastname' => $user[$element['lastname']],
+            'position' => $user[$element['position']],
+            'email' => $user[$element['email']]
         ));
     }
 }

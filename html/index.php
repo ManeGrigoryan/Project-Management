@@ -48,19 +48,5 @@ $app = new \Slim\App($container);
 $app = new \Slim\App($settings);
 include 'C:\wamp64\www\project-management\src\dependencies.php';
 include 'C:\wamp64\www\project-management\src\Api\routes.php';
-//$em=$app->getContainer()->get('entitymanager');
-//$user = new Users;
-//$user->setFirstname('Entity');
-//$user->setLastname('Manager');
-//$user->setPassword('1');
-//$user->setActive(1);
-//$user->setPosition(['developer']);
-//$user->setEmail('em@gmail.com');
-////var_dump($user);
-////die();
-//$em->persist($user);
-//$em->flush();
-//
-//echo "Created User with Email " . $em->getEmail() . "\n";
 $app->run();
 ?>
